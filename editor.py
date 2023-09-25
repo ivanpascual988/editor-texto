@@ -14,7 +14,7 @@ class TextEditor(tk.Tk):
         super().__init__()
         self.title("Editor de texto by Ivan Pascual") # Titulo de la app
         self.window_definition()
-        self.etiqueta_texto = []
+        
 
     def window_definition(self):
         """
@@ -46,7 +46,7 @@ class TextEditor(tk.Tk):
         t = ttk.Style()
         t.configure("Tachado.TButton", foreground="black", font=("Arial", 10, "overstrike"))
         # Botón para tachar el texto
-        self.tachado = ttk.Button(self, text="abc", width=5, style="Tachado.TButton")
+        self.tachado = ttk.Button(self, text="abc", width=5, style="Tachado.TButton", command=self.poner_quitar_tachado)
         self.tachado.place(x=200, y=10)
 
         # Botón poner abrir un archivo de texto
@@ -70,23 +70,17 @@ class TextEditor(tk.Tk):
         inicio_texto = self.texto.index(tk.SEL_FIRST)
         fin_texto =  self.texto.index(tk.SEL_LAST)
 
-        # Compruebo si esta subrayado o no
+        # Obtengo las etiquetas del texto seleccionado
         etiqueta_texto = (self.texto.tag_names(inicio_texto))
-        print(etiqueta_texto)
 
-        # Si el texto seleccionado está subrayado, lo quita
-        if "negrita" in etiqueta_texto:
-            self.texto.tag_remove("negrita", inicio_texto, fin_texto)
-            self.etiqueta_texto.remove("negrita")
-        # Si no esta subrayado, lo subraya
+        # Si tiene la etiqueta bold la eliminamos
+        if "bold" in etiqueta_texto:
+            self.texto.tag_remove("bold", inicio_texto, fin_texto)
+        # Si no tiene la etiqueta la añadimos
         else:
-            self.etiqueta_texto.append("negrita")     
-            self.texto.tag_add("negrita", inicio_texto, fin_texto)   # Si es la primera vez, le añade la etiqueta
-            if "cursiva" in self.etiqueta_texto:
-                self.texto.tag_configure("negrita", font=("Arial", 10, "bold", "italic"))
-            else:
-                self.texto.tag_configure("negrita", font=("Arial", 10, "bold"))
-        print(self.etiqueta_texto)
+            self.texto.tag_add("bold", inicio_texto, fin_texto)   # Si es la primera vez, le añade la etiqueta
+            self.texto.tag_configure("bold", font=("Arial", 10, "bold"))
+        
     
     def poner_quitar_cursiva(self):
         """
@@ -97,24 +91,17 @@ class TextEditor(tk.Tk):
         inicio_texto = self.texto.index(tk.SEL_FIRST)
         fin_texto =  self.texto.index(tk.SEL_LAST)
 
-        # Compruebo si esta subrayado o no
+        # Obtengo las etiquetas del texto seleccionado
         etiqueta_texto = (self.texto.tag_names(inicio_texto))
-        print(etiqueta_texto)
 
-        # Si el texto seleccionado está subrayado, lo quita
-        if "cursiva" in etiqueta_texto:
-            self.texto.tag_remove("cursiva", inicio_texto, fin_texto)
-            self.etiqueta_texto.remove("cursiva")
-        # Si no esta subrayado, lo subraya
+        # Si tiene la etiqueta italic la eliminamos
+        if "italic" in etiqueta_texto:
+            self.texto.tag_remove("italic", inicio_texto, fin_texto)
+        # Si no tiene la etiqueta la añadimos
         else:
-            self.etiqueta_texto.append("cursiva")
-            self.texto.tag_add("cursiva", inicio_texto, fin_texto)  # Si es la primera vez, le añade la etiqueta
-            if "negrita" in self.etiqueta_texto:
-                self.texto.tag_configure("cursiva", font=("Arial", 10, "bold", "italic"))
-            else:
-                self.texto.tag_configure("cursiva", font=("Arial", 10, "italic"))
-        print(self.etiqueta_texto)
-
+            self.texto.tag_add("italic", inicio_texto, fin_texto)  
+            self.texto.tag_configure("italic", font=("Arial", 10, "italic"))
+        
     def poner_quitar_subrayado(self):
         """
         Funcion para comprobar si el texto seleccionado esta subrayado o no.
@@ -124,17 +111,37 @@ class TextEditor(tk.Tk):
         inicio_texto = self.texto.index(tk.SEL_FIRST)
         fin_texto =  self.texto.index(tk.SEL_LAST)
 
+        # Obtenemos las etiquetas del texto seleccionado
+        etiqueta_texto = self.texto.tag_names(inicio_texto)
+
+        # Si tiene la etiqueta se la eliminamos
+        if "underline" in etiqueta_texto:
+            self.texto.tag_remove("underline", inicio_texto, fin_texto)
+        # Si no tiene la etiqueta la añadimos
+        else:
+            self.texto.tag_add("underline", inicio_texto, fin_texto)
+            self.texto.tag_configure("underline", underline=True)   # Configuramos la etiqueta para que esta subrayado
+
+    def poner_quitar_tachado(self):
+        """
+        Funcion para comprobar si el texto seleccionado esta tachado o no.
+        Si esta tachado lo quita y si no esta tachado, lo tacha
+        """
+        # Obtengo el texto seleccionado
+        inicio_texto = self.texto.index(tk.SEL_FIRST)
+        fin_texto =  self.texto.index(tk.SEL_LAST)
+
         # Compruebo si esta subrayado o no
         etiqueta_texto = self.texto.tag_names(inicio_texto)
 
-        # Si el texto seleccionado está subrayado, lo quita
-        if "subrayado" in etiqueta_texto:
-            self.texto.tag_remove("subrayado", inicio_texto, fin_texto)
+        # Si tiene la etiqueta se la eliminamos
+        if "overstrike" in etiqueta_texto:
+            self.texto.tag_remove("overstrike", inicio_texto, fin_texto)
+        # Si no tiene la etiqueta la añadimos
         else:
-            # Si es la primera vez, le añade la etiqueta
-            # Si no esta subrayado, lo subraya
-            self.texto.tag_add("subrayado", inicio_texto, fin_texto)
-            self.texto.tag_configure("subrayado", underline=True)
+            self.texto.tag_add("overstrike", inicio_texto, fin_texto)
+            self.texto.tag_configure("overstrike", overstrike=True)    # Configuramos la etiqueta para que esta tachado
 
-app = TextEditor()
-app.mainloop()
+if __name__ == "__main__":
+    app = TextEditor()
+    app.mainloop()
