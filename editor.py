@@ -5,9 +5,14 @@ Editor de texto que simula a cualquier editor de texto
 """
 
 # Importamos las bibliotecas 
+import os
 import tkinter as tk
 from tkinter import scrolledtext
 from tkinter import ttk
+from tkinter import filedialog
+from tkinter import messagebox
+import docx
+
 
 class TextEditor(tk.Tk):
     def __init__(self):
@@ -50,7 +55,7 @@ class TextEditor(tk.Tk):
         self.tachado.place(x=200, y=10)
 
         # Botón poner abrir un archivo de texto
-        self.abrir = ttk.Button(self, text="Abrir archivo")
+        self.abrir = ttk.Button(self, text="Abrir archivo", command=self.abrir_archivo)
         self.abrir.place(x=420, y=10)
 
         # Botón guardar el texto escrito
@@ -76,10 +81,21 @@ class TextEditor(tk.Tk):
         # Si tiene la etiqueta bold la eliminamos
         if "bold" in etiqueta_texto:
             self.texto.tag_remove("bold", inicio_texto, fin_texto)
+            if "italic" in etiqueta_texto:
+                self.texto.tag_configure("style", font=("Arial", 10, "normal", "italic"))
+            else:
+                self.texto.tag_remove("style", inicio_texto, fin_texto)
         # Si no tiene la etiqueta la añadimos
         else:
-            self.texto.tag_add("bold", inicio_texto, fin_texto)   # Si es la primera vez, le añade la etiqueta
-            self.texto.tag_configure("bold", font=("Arial", 10, "bold"))
+            self.texto.tag_add("bold", inicio_texto, fin_texto) 
+            # Si no tiene la etiqueta style la añadimos
+            if "style" not in etiqueta_texto:
+                self.texto.tag_add("style", inicio_texto, fin_texto)
+            # Si tiene la etiqueta bold
+            if "italic" in etiqueta_texto:
+                self.texto.tag_configure("style", font=("Arial", 10, "bold", "italic"))
+            else:
+                self.texto.tag_configure("style", font=("Arial", 10, "bold", "roman"))
         
     
     def poner_quitar_cursiva(self):
@@ -97,10 +113,22 @@ class TextEditor(tk.Tk):
         # Si tiene la etiqueta italic la eliminamos
         if "italic" in etiqueta_texto:
             self.texto.tag_remove("italic", inicio_texto, fin_texto)
+            if "bold" in etiqueta_texto:
+                self.texto.tag_configure("style", font=("Arial", 10, "bold", "roman"))
+            else:
+                self.texto.tag_remove("style", inicio_texto, fin_texto)
         # Si no tiene la etiqueta la añadimos
         else:
-            self.texto.tag_add("italic", inicio_texto, fin_texto)  
-            self.texto.tag_configure("italic", font=("Arial", 10, "italic"))
+            self.texto.tag_add("italic", inicio_texto, fin_texto) 
+            # Si no tiene la etiqueta style la añadimos
+            if "style" not in etiqueta_texto:
+                self.texto.tag_add("style", inicio_texto, fin_texto)
+            # Si tiene la etiqueta bold
+            if "bold" in etiqueta_texto:
+                self.texto.tag_configure("style", font=("Arial", 10, "bold", "italic"))
+            else:
+                self.texto.tag_configure("style", font=("Arial", 10, "normal", "italic"))
+            
         
     def poner_quitar_subrayado(self):
         """
@@ -141,6 +169,42 @@ class TextEditor(tk.Tk):
         else:
             self.texto.tag_add("overstrike", inicio_texto, fin_texto)
             self.texto.tag_configure("overstrike", overstrike=True)    # Configuramos la etiqueta para que esta tachado
+        
+    def abrir_archivo(self):
+        """
+        Funcion para cargar un archivo de texto ya existente en el recuadro del editor
+        """
+        # Guardamos la ruta del archivo seleccionado, unicamente se pondran subir archivos de texto y de word
+        ruta_archivo= filedialog.askopenfilename(
+            filetypes=(
+                ("Archivos de texto", "*.txt"),
+                ("Archivos de Word", "*.docx")
+            )
+        )
+
+        # Controlo que se suba un archivo
+        try:
+            archivo = open(ruta_archivo, "r", encoding="utf-8")     # Abro el archivo
+            ruta, extension = os.path.splitext(archivo.name)        # Obtengo la extension
+
+            # Si es un archivo de texto
+            if extension == ".txt":
+                contenido = archivo.read()
+                self.texto.delete("1.0", tk.END)    # Borro el contenido que habia
+                self.texto.insert("1.0", contenido) # Inserto el contenido
+            
+            # Si es un archivo de word
+            if extension == ".docx":
+                documento = docx.Document(archivo.name)
+                self.texto.delete("1.0", tk.END)    # Borro el contendio que habia
+                # Recorro el archivo word parrafo a parrafo
+                for parrafo in documento.paragraphs:
+                    # Inserto el contenido del parrago y paso a la siguiente linea
+                    self.texto.insert("1.0", parrafo.text + "\n")
+        
+        # Mensaje si no se sube ningun archivo
+        except FileNotFoundError:
+            messagebox.showerror("Atencion", "No selecciono ningun archivo")
 
 if __name__ == "__main__":
     app = TextEditor()
