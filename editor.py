@@ -4,7 +4,7 @@ Editor de texto que simula a cualquier editor de texto
 @Author Iván Pascual
 """
 
-# Importamos las bibliotecas 
+# Importo las bibliotecas necesarias
 import os
 import tkinter as tk
 from tkinter import scrolledtext
@@ -59,7 +59,7 @@ class TextEditor(tk.Tk):
         self.abrir.place(x=420, y=10)
 
         # Botón guardar el texto escrito
-        self.guardar = ttk.Button(self, text="Guardar archivo")
+        self.guardar = ttk.Button(self, text="Guardar archivo", command=self.guardar_archivo)
         self.guardar.place(x=520, y=10)
 
         # Área de entrada de texto para el usuario
@@ -205,6 +205,42 @@ class TextEditor(tk.Tk):
         # Mensaje si no se sube ningun archivo
         except FileNotFoundError:
             messagebox.showerror("Atencion", "No selecciono ningun archivo")
+    
+    def guardar_archivo(self):
+        """
+        Funcion para guardar el texto en un archivo
+        """
+         # Obtener el texto
+        contenido = self.texto.get("1.0", tk.END) 
+        ruta_guardado = filedialog.asksaveasfilename(
+            defaultextension=".txt",    # extension por defecto
+            filetypes=(
+                ("Archivos de texto", "*.txt"),
+                ("Archivos de Word", "*.docx")
+            )
+        )
+    
+        # Si guardamos el archivo
+        if ruta_guardado:
+
+            # Comprobamos que el archivo se guarda correctamente
+            try:
+                with open(ruta_guardado, "w", encoding="utf-8") as archivo:
+                    ruta, extension = os.path.splitext(archivo.name)
+                    # Si es un archivo de texto
+                    if extension == ".txt":
+                        archivo.write(contenido)
+                        messagebox.showinfo("Información", "El archivo se ha guardado correctamente.")
+
+                    # Si es un archivo de word
+                    if extension == ".docx":
+                        doc = docx.Document()
+                        doc.add_paragraph(contenido)
+                        doc.save(ruta_guardado)
+                        messagebox.showinfo("Información", "El archivo se ha guardado correctamente.")
+
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al guardar el archivo: {str(e)}")
 
 if __name__ == "__main__":
     app = TextEditor()
